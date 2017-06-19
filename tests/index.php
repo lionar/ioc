@@ -36,4 +36,17 @@ $container->bind ( 'greet', function ( Greeting $greeting, $hello )
 	echo $hello;
 } );
 
-$container->make ( 'greet', [ 'hello' => '<h1>Hello man</h1>' ] );
+// $container->make ( 'greet', [ 'hello' => '<h1>Hello man</h1>' ] );
+
+
+class testing
+{
+
+}
+
+$container->share ( 'testing', function ( )
+{
+	return new testing;
+} );
+
+var_dump ( $container->make ( 'testing' ) === $container->make ( 'testing' ) );
