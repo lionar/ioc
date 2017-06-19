@@ -1,6 +1,6 @@
 {
 	"name": "lionar/ioc",
-	"version": "0.0.1",
+	"version": "1.0.0",
 	"description": "Ultimate basic IOC container.",
 	"keywords": [ "Lionar", "Basic", "IOC" ],
 	"license": "MIT",

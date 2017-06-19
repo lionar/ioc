@@ -12,7 +12,6 @@ class container
 	use parameters\resolver;
 
 	private $bindings = [ ];
-	private $parameters = null;
 
 	public function bind ( string $abstract, closure $concrete )
 	{
