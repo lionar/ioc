@@ -1,15 +1,28 @@
 <?php
 
-namespace ioc\parameters;
+namespace ioc;
 
 use Closure as closure;
 use ioc\exceptions\unresolvableDependencyException;
 use ReflectionFunction as reflection;
 use ReflectionParameter as parameter;
 
-trait resolver
+class resolver
 {	
-	public function resolve ( closure $concrete, array $payload = [ ] ) : array
+	private $container = null;
+
+	public function __construct ( container $container )
+	{
+		$this->container = $container;
+	}
+
+	public function resolve ( closure $concrete, array $payload = [ ] )
+	{
+		$parameters = $this->getParameters ( $concrete, $payload );
+		return call_user_func_array ( $concrete, $parameters );
+	}
+
+	private function getParameters ( closure $concrete, array $payload = [ ] ) : array
 	{
 		$reflection = new reflection ( $concrete );
 
@@ -26,8 +39,8 @@ trait resolver
 
 		if ( array_key_exists ( $name, $payload ) )
 			return $payload [ $name ];
-		if ( ! empty ( $type ) and $this->bound ( $type ) )
-			return $this->make ( $type );
+		if ( ! empty ( $type ) and $this->container->bound ( $type ) )
+			return $this->container->make ( $type );
 		if ( $parameter->isDefaultValueAvailable ( ) )
 			return $parameter->getDefaultValue ( );
 

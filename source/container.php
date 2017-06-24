@@ -2,40 +2,52 @@
 
 namespace ioc;
 
-use ioc\exceptions\alreadyBoundException;
-use ioc\exceptions\notBoundException;
-use ioc\parameters\resolver;
+use Closure as closure;
+use ioc\exceptions\inexistentBindingException;
 
 class container
 {
-	use binding;
-	use parameters\resolver;
+	private $resolver = null;
+	private $instances = null;
+	private $bindings = null;
 
-	private $instances = [ ];
+	public function __construct ( resolver $resolver = null, instances $instances = null, bindings $bindings = null )
+	{
+		$this->resolver = ( $resolver ) ?: new resolver ( $this );
+		$this->instances = ( $instances ) ?: new instances ( $this->resolver );
+		$this->bindings = ( $bindings ) ?: new bindings ( $this->resolver );
+	}
+
+	public function bind ( string $abstract, closure $concrete, bool $shared = false )
+	{
+		if ( $shared )
+			$this->instances->add ( $abstract, $concrete );
+		else
+			$this->bindings->add ( $abstract, $concrete );
+	}
+
+	public function share ( string $abstract, closure $concrete )
+	{
+		$this->bind ( $abstract, $concrete, true );
+	}
 
 	public function make ( string $abstract, array $payload = [ ] )
 	{
-		if ( ! $this->bound ( $abstract ) )
-			throw new notBoundException ( $abstract );
-
-		return ( $this->instances [ $abstract ] ) ?? $this->build ( $abstract, $payload );
+		if ( $this->instances->has ( $abstract ) )
+			return $this->instances->resolve ( $abstract, $payload );
+		if ( $this->bindings->has ( $abstract ) )
+			return $this->bindings->resolve ( $abstract, $payload );
+		throw new inexistentBindingException ( $abstract );
 	}
 
-	private function build ( string $abstract, array $payload = [ ] )
+	public function call ( closure $concrete, array $payload = [ ] )
 	{
-		$concrete = ( $this->bindings [ $abstract ] ) ?? $this->bindings [ 'shared' ] [ $abstract ];
-
-		$parameters = $this->resolve ( $concrete, $payload );
-		$concrete = call_user_func_array ( $concrete, $parameters );
-
-		return $this->resolving ( $abstract, $concrete );
+		return $this->resolver->resolve ( $concrete, $payload );
 	}
 
-	private function resolving ( string $abstract, $concrete )
+	public function bound ( string $abstract ) : bool
 	{
-		if ( $this->isShared ( $abstract ) )
-			$this->instances [ $abstract ] = $concrete;
-		
-		return $concrete;
+		return ( $this->instances->has ( $abstract ) or
+			$this->bindings->has ( $abstract ) );
 	}
 }
