@@ -22,4 +22,12 @@ $container->share ( 'name', function ( container $container )
 	return "$first $last";
 } );
 
-echo $container->make ( 'name' );
+// echo $container->make ( 'name' );
+
+
+echo $container->call ( function ( container $container )
+{
+	$first = $container->make ( 'first' );
+	$last = $container->make ( 'last' );
+	return "$first $last from the call method.";
+} );
