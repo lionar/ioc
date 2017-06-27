@@ -31,6 +31,14 @@ class container
 		$this->bind ( $abstract, $concrete, true );
 	}
 
+	public function instance ( string $abstract, $concrete )
+	{
+		$this->share ( $abstract, function ( ) use ( $concrete )
+		{
+			return $concrete;
+		} );
+	}
+
 	public function make ( string $abstract, array $payload = [ ] )
 	{
 		if ( $this->instances->has ( $abstract ) )

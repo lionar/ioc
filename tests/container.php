@@ -31,3 +31,8 @@ echo $container->call ( function ( container $container )
 	$last = $container->make ( 'last' );
 	return "$first $last from the call method.";
 } );
+
+
+$container->instance ( 'app', 'my app string' );
+
+var_dump ( $container->make ( 'app' ) );
