@@ -35,12 +35,15 @@ class resolver
 	private function fill ( parameter $parameter, array $payload )
 	{
 		$name = $parameter->getName ( );
-		$type = $this->type ( $parameter );
 
 		if ( array_key_exists ( $name, $payload ) )
 			return $payload [ $name ];
+		
+		$type = $this->type ( $parameter );
+
 		if ( ! empty ( $type ) and $this->container->bound ( $type ) )
 			return $this->container->make ( $type );
+		
 		if ( $parameter->isDefaultValueAvailable ( ) )
 			return $parameter->getDefaultValue ( );
 
@@ -49,7 +52,7 @@ class resolver
 
 	private function type ( parameter $parameter )
 	{
-		return ( $parameter->hasType ( ) ) ?
+		return ( $parameter->hasType ( ) and ! $parameter->getType ( )->isBuiltin ( ) ) ?
 			$parameter->getClass ( )->getName ( ) : '';
 	}
 }
